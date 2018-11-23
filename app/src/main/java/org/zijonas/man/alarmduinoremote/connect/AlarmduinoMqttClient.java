@@ -18,7 +18,7 @@ public class AlarmduinoMqttClient {
 
     MqttAndroidClient client;
 
-    public MqttAndroidClient getClient(Context pContext, String pServerUrl, String pClientId) {
+    public MqttAndroidClient getClient(Context pContext, final String pServerUrl, final String pClientId) {
 
         client = new MqttAndroidClient(pContext, pServerUrl, pClientId);
 
@@ -33,7 +33,9 @@ public class AlarmduinoMqttClient {
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    Log.d("Client", "Connect Failed - Verify the config");
+                    Log.d("Client", "Connect Failed - Verify the config " + pServerUrl + " " + pClientId);
+                    Log.d("Exception:", exception.getMessage());
+                    exception.printStackTrace();
                 }
             });
 

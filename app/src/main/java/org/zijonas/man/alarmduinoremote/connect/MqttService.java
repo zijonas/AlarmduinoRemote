@@ -20,24 +20,29 @@ import org.zijonas.man.alarmduinoremote.Constants;
 import org.zijonas.man.alarmduinoremote.R;
 
 public class MqttService extends Service {
-    private static final String TAG = "Service";
-    AlarmduinoMqttClient client;
+    private static final String TAG = "MqttService";
+    private AlarmduinoMqttClient client;
+    private MqttAndroidClient aClient;
 
+    @Override
     public void onCreate() {
+        super.onCreate();
+
+        Log.d(TAG, "On Create");
+
         if(client == null) {
             client = new AlarmduinoMqttClient();
-            MqttAndroidClient aClient = client.getClient(
-                    getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
+            aClient = client.getClient(getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
 
             aClient.setCallback(new MqttCallbackExtended() {
                 @Override
                 public void connectComplete(boolean b, String s) {
-
+                    Log.d(TAG, "Connected");
                 }
 
                 @Override
                 public void connectionLost(Throwable throwable) {
-
+                    Log.d(TAG, "Connection Lost\n" + throwable.getStackTrace());
                 }
 
                 @Override
@@ -72,8 +77,7 @@ public class MqttService extends Service {
     }
 
     private void setMessageNotification(@NonNull String topic, @NonNull String msg) {
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this, "XXX")
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "XXX")
                         .setSmallIcon(R.drawable.ic_launcher_background)
                         .setContentTitle(topic)
                         .setContentText(msg);
@@ -82,11 +86,9 @@ public class MqttService extends Service {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(AlarmduinoHome.class);
         stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(resultPendingIntent);
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(100, mBuilder.build());
     }
 }
