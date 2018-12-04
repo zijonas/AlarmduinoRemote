@@ -9,15 +9,20 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.util.JsonReader;
 import android.util.Log;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.zijonas.man.alarmduinoremote.AlarmduinoHome;
 import org.zijonas.man.alarmduinoremote.Constants;
 import org.zijonas.man.alarmduinoremote.R;
+import org.zijonas.man.alarmduinoremote.Status;
 
 public class MqttService extends Service {
     private static final String TAG = "MqttService";
@@ -47,7 +52,11 @@ public class MqttService extends Service {
 
                 @Override
                 public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                    setMessageNotification(s, new String(mqttMessage.getPayload()));
+                    Log.d(this.getClass().toString(), mqttMessage.toString());
+                    String state = getElement(mqttMessage.toString(), "state");
+                    if(Integer.parseInt(state) != Status.getStatus())
+                      setMessageNotification(s, state);
+                    Status.setStatus(Integer.parseInt(state));
                 }
 
                 @Override
@@ -90,5 +99,16 @@ public class MqttService extends Service {
         mBuilder.setContentIntent(resultPendingIntent);
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(100, mBuilder.build());
+    }
+
+    private String getElement(String pMessage, String pElement) {
+        try {
+            JSONObject jo = new JSONObject(pMessage);
+            String state = jo.getJSONObject("alarm").getString(pElement);
+            return state;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

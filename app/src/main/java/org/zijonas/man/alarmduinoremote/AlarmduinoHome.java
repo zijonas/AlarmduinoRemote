@@ -1,6 +1,7 @@
 package org.zijonas.man.alarmduinoremote;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -31,35 +32,50 @@ public class AlarmduinoHome extends AppCompatActivity {
         alarmduinoClient = new AlarmduinoMqttClient();
         mqttClient = alarmduinoClient.getClient(getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
 
-        textArea = (EditText) findViewById(R.id.editTextMessages);
+        connectButton = (Button) findViewById(R.id.buttonConnect);
+        textArea = findViewById(R.id.editTextMessages);
+        textArea.setText("Initialising");
+//        mqttClient.setCallback(new MqttCallbackExtended() {
+//            @Override
+//            public void connectComplete(boolean reconnect, String serverURI) {
+//                Log.d("CONNECTED.....", "Home act");
+//            }
+//
+//            @Override
+//            public void connectionLost(Throwable cause) {
+//
+//            }
+//
+//            @Override
+//            public void messageArrived(String topic, MqttMessage message) throws Exception {
+//                Log.d("Message arrived.....", message.toString());
+//                textArea.setText(message.toString());
+//
+//            }
+//
+//            @Override
+//            public void deliveryComplete(IMqttDeliveryToken token) {
+//
+//            }
+//        });
 
-        mqttClient.setCallback(new MqttCallbackExtended() {
+        Status.registerListener(new MessageReceivedListener() {
             @Override
-            public void connectComplete(boolean reconnect, String serverURI) {
-                Log.d("CONNECTED.....", "Home act");
-            }
-
-            @Override
-            public void connectionLost(Throwable cause) {
-
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                Log.d("Message arrived.....", message.toString());
-                textArea.setText(message.toString());
-
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
+            public void onMessageReceived() {
+                int state = Status.getStatus();
+                textArea.setText(String.valueOf(state));
+                if(state == 30) {
+                    connectButton.setBackgroundColor(Color.GREEN);
+                } else {
+                    if(state == 100) {
+                        connectButton.setBackgroundColor(Color.BLUE);
+                    }
+                }
             }
         });
 
         Log.d("Initializing.....", "Home act");
 
-        connectButton = (Button) findViewById(R.id.buttonConnect);
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
