@@ -4,9 +4,12 @@ import java.util.ArrayList;
 
 public class Status {
     private static int status = 0;
+    private static ArrayList<MessageReceivedListener> listeners = new ArrayList<>();
 
-    private static ArrayList<MessageReceivedListener> listeners = new ArrayList<MessageReceivedListener>();
-
+    public static final int FIRED = 5;
+    public static final int ENABLED = 30;
+    public static final int REARMED = 60;
+    public static final int DISABLED = 100;
 
     public static int getStatus() {
         return status;

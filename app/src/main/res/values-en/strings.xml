@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">AlarmduinoRemote</string>
+    <string name="app_name">AlarmduinoRemote</string>
     <string name="deactivated">Deactivated</string>
     <string name="activated">Activated</string>
     <string name="triggered">Triggered</string>

@@ -10,65 +10,33 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.zijonas.man.alarmduinoremote.connect.AlarmduinoMqttClient;
 import org.zijonas.man.alarmduinoremote.connect.MqttService;
 
 public class AlarmduinoHome extends AppCompatActivity {
 
-    MqttAndroidClient mqttClient;
     AlarmduinoMqttClient alarmduinoClient;
-    Button connectButton;
-    EditText textArea;
+    Button buttonConnect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarmduino_home);
 
-        alarmduinoClient = new AlarmduinoMqttClient();
-        mqttClient = alarmduinoClient.getClient(getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
+        alarmduinoClient = new AlarmduinoMqttClient(getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
 
-        connectButton = (Button) findViewById(R.id.buttonConnect);
-        textArea = findViewById(R.id.editTextMessages);
-        textArea.setText("Initialising");
-//        mqttClient.setCallback(new MqttCallbackExtended() {
-//            @Override
-//            public void connectComplete(boolean reconnect, String serverURI) {
-//                Log.d("CONNECTED.....", "Home act");
-//            }
-//
-//            @Override
-//            public void connectionLost(Throwable cause) {
-//
-//            }
-//
-//            @Override
-//            public void messageArrived(String topic, MqttMessage message) throws Exception {
-//                Log.d("Message arrived.....", message.toString());
-//                textArea.setText(message.toString());
-//
-//            }
-//
-//            @Override
-//            public void deliveryComplete(IMqttDeliveryToken token) {
-//
-//            }
-//        });
+        buttonConnect = findViewById(R.id.buttonConnect);
 
         Status.registerListener(new MessageReceivedListener() {
             @Override
             public void onMessageReceived() {
                 int state = Status.getStatus();
-                textArea.setText(String.valueOf(state));
-                if(state == 30) {
-                    connectButton.setBackgroundColor(Color.GREEN);
+                if (state == Status.ENABLED) {
+                    buttonConnect.setBackgroundColor(Color.GREEN);
                 } else {
-                    if(state == 100) {
-                        connectButton.setBackgroundColor(Color.BLUE);
+                    if (state == Status.DISABLED) {
+                        buttonConnect.setBackgroundColor(Color.BLUE);
                     }
                 }
             }
@@ -76,23 +44,21 @@ public class AlarmduinoHome extends AppCompatActivity {
 
         Log.d("Initializing.....", "Home act");
 
-        connectButton.setOnClickListener(new View.OnClickListener() {
+        buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
                     Log.d("HOME", "Button clicked");
-                    if (mqttClient.isConnected()) {
-                        alarmduinoClient.subscribe(mqttClient, Constants.PUBLISH_TOPIC, 0);
+                    if (alarmduinoClient.isConnected()) {
+                        alarmduinoClient.subscribe(Constants.TOPIC, 0);
                     } else {
                         Log.d("HOME", "Client not conected");
                     }
-
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
             }
         });
-
 
 
         Log.d("HOME", "Start service");

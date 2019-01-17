@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AlarmduinoRemote</string>
+    <string name="deactivated">Deaktiviert</string>
+    <string name="activated">Aktiviert</string>
+    <string name="triggered">Ausgelöst</string>
+</resources>

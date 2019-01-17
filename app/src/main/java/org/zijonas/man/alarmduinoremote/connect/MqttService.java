@@ -9,16 +9,13 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
-import android.util.JsonReader;
 import android.util.Log;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.zijonas.man.alarmduinoremote.AlarmduinoHome;
 import org.zijonas.man.alarmduinoremote.Constants;
 import org.zijonas.man.alarmduinoremote.R;
@@ -27,7 +24,6 @@ import org.zijonas.man.alarmduinoremote.Status;
 public class MqttService extends Service {
     private static final String TAG = "MqttService";
     private AlarmduinoMqttClient client;
-    private MqttAndroidClient aClient;
 
     @Override
     public void onCreate() {
@@ -36,10 +32,9 @@ public class MqttService extends Service {
         Log.d(TAG, "On Create");
 
         if(client == null) {
-            client = new AlarmduinoMqttClient();
-            aClient = client.getClient(getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
+            client = new AlarmduinoMqttClient(getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
 
-            aClient.setCallback(new MqttCallbackExtended() {
+            client.setCallback(new MqttCallbackExtended() {
                 @Override
                 public void connectComplete(boolean b, String s) {
                     Log.d(TAG, "Connected");
@@ -47,14 +42,14 @@ public class MqttService extends Service {
 
                 @Override
                 public void connectionLost(Throwable throwable) {
-                    Log.d(TAG, "Connection Lost\n" + throwable.getStackTrace());
+                    Log.d(TAG, "Connection Lost\n" + throwable.getStackTrace().toString());
                 }
 
                 @Override
-                public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+                public void messageArrived(String s, MqttMessage mqttMessage) {
                     Log.d(this.getClass().toString(), mqttMessage.toString());
                     String state = getElement(mqttMessage.toString(), "state");
-                    if(Integer.parseInt(state) != Status.getStatus())
+                    if(state != null && Integer.parseInt(state) != Status.getStatus())
                       setMessageNotification(s, state);
                     Status.setStatus(Integer.parseInt(state));
                 }
@@ -87,7 +82,7 @@ public class MqttService extends Service {
 
     private void setMessageNotification(@NonNull String topic, @NonNull String msg) {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "XXX")
-                        .setSmallIcon(R.drawable.ic_launcher_background)
+                        .setSmallIcon(R.drawable.ic_launcher_foreground)
                         .setContentTitle(topic)
                         .setContentText(msg);
         Intent resultIntent = new Intent(this, AlarmduinoHome.class);
@@ -104,8 +99,7 @@ public class MqttService extends Service {
     private String getElement(String pMessage, String pElement) {
         try {
             JSONObject jo = new JSONObject(pMessage);
-            String state = jo.getJSONObject("alarm").getString(pElement);
-            return state;
+            return jo.getJSONObject("alarm").getString(pElement);
         } catch (JSONException e) {
             e.printStackTrace();
         }
