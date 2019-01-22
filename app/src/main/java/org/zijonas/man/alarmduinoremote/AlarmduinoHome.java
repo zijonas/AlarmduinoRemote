@@ -7,9 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.zijonas.man.alarmduinoremote.connect.AlarmduinoMqttClient;
 import org.zijonas.man.alarmduinoremote.connect.MqttService;
@@ -26,7 +24,7 @@ public class AlarmduinoHome extends AppCompatActivity {
 
         alarmduinoClient = new AlarmduinoMqttClient(getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
 
-        buttonConnect = findViewById(R.id.buttonConnect);
+        buttonConnect = findViewById(R.id.buttonTrigger);
 
         Status.registerListener(new MessageReceivedListener() {
             @Override

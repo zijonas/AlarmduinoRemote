@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.zijonas.man.alarmduinoremote">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -12,16 +17,21 @@
         <activity android:name=".AlarmduinoHome">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service android:name="org.eclipse.paho.android.service.MqttService" />
-        <service android:name=".connect.MqttService" android:enabled="true" android:exported="false" />
+        <service
+            android:name=".connect.MqttService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".connect.ServiceStarter"
+            android:enabled="true"
+            android:exported="true"
+            android:label="Starts the service if its not running" />
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 </manifest>
