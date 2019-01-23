@@ -1,10 +1,8 @@
 package org.zijonas.man.alarmduinoremote;
 
-import java.util.ArrayList;
-
 public class Status {
     private static int status = 0;
-    private static ArrayList<MessageReceivedListener> listeners = new ArrayList<>();
+    private static MessageReceivedListener listener;
 
     public static final int FIRED = 5;
     public static final int ENABLED = 30;
@@ -16,23 +14,18 @@ public class Status {
     }
 
     public static void setStatus(int pStatus) {
-        if(pStatus != status) {
+        if (pStatus != status) {
             status = pStatus;
-            for(MessageReceivedListener l : listeners) {
-                try {
-                    l.onMessageReceived();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            for(MessageReceivedListener rl : listeners) {
-                rl.onMessageReceived();
-            }
+            listener.onMessageReceived();
         }
     }
 
     public static void registerListener(MessageReceivedListener pListener) {
-        listeners.add(pListener);
+        listener = pListener;
+    }
+
+    public static void unregisterListener() {
+        listener = null;
     }
 
 }

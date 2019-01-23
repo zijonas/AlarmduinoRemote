@@ -61,7 +61,13 @@ public class AlarmduinoHome extends AppCompatActivity {
 
         Log.d("HOME", "Start service");
 
-        Intent intent = new Intent(AlarmduinoHome.this, MqttService.class);
-        startService(intent);
+//        Intent intent = new Intent(AlarmduinoHome.this, MqttService.class);
+//        startService(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Status.unregisterListener();
     }
 }

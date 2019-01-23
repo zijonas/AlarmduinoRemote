@@ -31,7 +31,7 @@ public class MqttService extends Service {
 
         Log.d(TAG, "On Create");
 
-        if(client == null) {
+        if (client == null) {
             client = new AlarmduinoMqttClient(getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
 
             client.setCallback(new MqttCallbackExtended() {
@@ -49,8 +49,8 @@ public class MqttService extends Service {
                 public void messageArrived(String s, MqttMessage mqttMessage) {
                     Log.d(this.getClass().toString(), mqttMessage.toString());
                     String state = getElement(mqttMessage.toString(), "state");
-                    if(state != null && Integer.parseInt(state) != Status.getStatus())
-                      setMessageNotification(s, state);
+                    if (state != null && Integer.parseInt(state) != Status.getStatus())
+                        setMessageNotification(s, state);
                     Status.setStatus(Integer.parseInt(state));
                 }
 
@@ -82,9 +82,9 @@ public class MqttService extends Service {
 
     private void setMessageNotification(@NonNull String topic, @NonNull String msg) {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "XXX")
-                        .setSmallIcon(R.drawable.ic_launcher_foreground)
-                        .setContentTitle(topic)
-                        .setContentText(msg);
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle(topic)
+                .setContentText(msg);
         Intent resultIntent = new Intent(this, AlarmduinoHome.class);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
