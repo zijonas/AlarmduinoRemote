@@ -6,13 +6,17 @@ import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,21 +24,27 @@ import org.zijonas.man.alarmduinoremote.AlarmduinoHome;
 import org.zijonas.man.alarmduinoremote.Constants;
 import org.zijonas.man.alarmduinoremote.R;
 import org.zijonas.man.alarmduinoremote.Status;
+import org.zijonas.man.alarmduinoremote.helper.JsonHelper;
 
 public class MqttService extends Service {
     private static final String TAG = "MqttService";
     private AlarmduinoMqttClient client;
+    private MqttAndroidClient aClient;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    private HandlerThread mHandlerThread;
+    private Handler mHandler;
 
-        Log.d(TAG, "On Create");
 
-        if (client == null) {
-            client = new AlarmduinoMqttClient(getApplicationContext(), Constants.BROKER_URL, Constants.CLIENT_ID);
+    public MqttService(Context applicationContext) {
+        super();
+        Log.i(TAG, "now");
+        Log.d(TAG, "Constructor");
 
-            client.setCallback(new MqttCallbackExtended() {
+        if (aClient == null) {
+            client = new AlarmduinoMqttClient();
+            aClient = client.getClient(applicationContext, Constants.BROKER_URL, Constants.CLIENT_ID);
+
+            aClient.setCallback(new MqttCallbackExtended() {
                 @Override
                 public void connectComplete(boolean b, String s) {
                     Log.d(TAG, "Connected");
@@ -48,9 +58,9 @@ public class MqttService extends Service {
                 @Override
                 public void messageArrived(String s, MqttMessage mqttMessage) {
                     Log.d(this.getClass().toString(), mqttMessage.toString());
-                    String state = getElement(mqttMessage.toString(), "state");
-                    if (state != null && Integer.parseInt(state) != Status.getStatus())
-                        setMessageNotification(s, state);
+                    String state = (String) getElement(mqttMessage.toString(), "alarm.state");
+                    //if (state != null && Integer.parseInt(state) != Status.getStatus())
+                     //   setMessageNotification(s, state);
                     Status.setStatus(Integer.parseInt(state));
                 }
 
@@ -59,7 +69,31 @@ public class MqttService extends Service {
 
                 }
             });
+            mHandlerThread = new HandlerThread("LocalServiceThread");
+            mHandlerThread.start();
+
+            mHandler = new Handler(mHandlerThread.getLooper());
+            postRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    while(!aClient.isConnected()) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    try {
+                        client.subscribe(aClient, Constants.TOPIC, 0);
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
+    }
+
+    public MqttService() {
     }
 
     @Override
@@ -72,10 +106,13 @@ public class MqttService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
+        Intent starterIntent = new Intent(this, ServiceStarter.class);
+        sendBroadcast(starterIntent);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
         Log.d(TAG, "onStartCommand");
         return START_STICKY;
     }
@@ -96,13 +133,16 @@ public class MqttService extends Service {
         mNotificationManager.notify(100, mBuilder.build());
     }
 
-    private String getElement(String pMessage, String pElement) {
+    private Object getElement(String pMessage, String pElement) {
         try {
-            JSONObject jo = new JSONObject(pMessage);
-            return jo.getJSONObject("alarm").getString(pElement);
+            return JsonHelper.getElement(new JSONObject(pMessage), pElement);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void postRunnable(Runnable runnable) {
+        mHandler.post(runnable);
     }
 }

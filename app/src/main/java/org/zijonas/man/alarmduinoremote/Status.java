@@ -16,7 +16,9 @@ public class Status {
     public static void setStatus(int pStatus) {
         if (pStatus != status) {
             status = pStatus;
-            listener.onMessageReceived();
+            if(listener != null) {
+                listener.onMessageReceived();
+            }
         }
     }
 

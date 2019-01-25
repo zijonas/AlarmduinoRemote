@@ -31,7 +31,11 @@
             android:name=".connect.ServiceStarter"
             android:enabled="true"
             android:exported="true"
-            android:label="Starts the service if its not running" />
+            android:label="Starts the service if its not running">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

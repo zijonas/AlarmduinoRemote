@@ -14,17 +14,20 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.UnsupportedEncodingException;
 
-public class AlarmduinoMqttClient extends MqttAndroidClient {
+public class AlarmduinoMqttClient {
 
-    public AlarmduinoMqttClient (Context pContext, final String pServerUrl, final String pClientId) {
-        super(pContext, pServerUrl, pClientId);
+    MqttAndroidClient client;
+
+    public MqttAndroidClient getClient(Context pContext, final String pServerUrl, final String pClientId) {
+
+        client = new MqttAndroidClient(pContext, pServerUrl, pClientId);
 
         try {
-            IMqttToken token = connect(getMqttConnectionOption());
+            IMqttToken token = client.connect(getMqttConnectionOption());
             token.setActionCallback(new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    setBufferOpts(getDisconnectedBufferOptions());
+                    client.setBufferOpts(getDisconnectedBufferOptions());
                     Log.d("Client", "Connect Success");
                 }
 
@@ -39,19 +42,21 @@ public class AlarmduinoMqttClient extends MqttAndroidClient {
         } catch (MqttException ex) {
             Log.d("Client", "Connect Failed to connect to server");
         }
+
+        return client;
     }
 
-    public void publishMessage(@NonNull String pMsg, int pQos, @NonNull String pTopic) throws MqttException, UnsupportedEncodingException {
+    public void publishMessage(@NonNull MqttAndroidClient pClient, @NonNull String pMsg, int pQos, @NonNull String pTopic) throws MqttException, UnsupportedEncodingException {
         byte[] encodedPayload;
         encodedPayload = pMsg.getBytes("UTF-8");
         MqttMessage message = new MqttMessage(encodedPayload);
         message.setRetained(true);
         message.setQos(pQos);
-        publish(pTopic, message);
+        pClient.publish(pTopic, message);
     }
 
-    public void subscribeTopic(@NonNull final String pTopic, int pQos) throws MqttException {
-        IMqttToken token = subscribe(pTopic, pQos);
+    public void subscribe(@NonNull MqttAndroidClient pClient, @NonNull final String pTopic, int pQos) throws MqttException {
+        IMqttToken token = pClient.subscribe(pTopic, pQos);
         token.setActionCallback(new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken iMqttToken) {
@@ -65,8 +70,8 @@ public class AlarmduinoMqttClient extends MqttAndroidClient {
         });
     }
 
-    public void unSubscribeTopic(@NonNull final String pTopic) throws MqttException {
-        IMqttToken token = unsubscribe(pTopic);
+    public void unSubscribe(@NonNull MqttAndroidClient pClient, @NonNull final String pTopic) throws MqttException {
+        IMqttToken token = pClient.unsubscribe(pTopic);
         token.setActionCallback(new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken iMqttToken) {

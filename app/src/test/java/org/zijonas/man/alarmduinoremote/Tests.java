@@ -17,20 +17,17 @@ public class Tests {
 
     @Test
     public void Jsontest() {
-        String str = "{\"state\":\"100\"}";
-//                "\"alarm\": {\n" +
-//                "\"state\": \"100\",\n" +
-//                "\"timestamp\": \"88662861\"\n" +
-//                "\n" +
-//                "}\n" +
-//                "}";
-        String json_str = "{\"titulo\":\"Os Arquivos JSON\",\"ano\":1998, \"genero\":\"Ficção\"}";
-        JSONObject my_obj;
+        String str = "{"+
+                "\"alarm\": {\n" +
+                "\"state\": \"100\",\n" +
+                "\"timestamp\": \"88662861\"\n" +
+                "\n" +
+                "}\n" +
+                "}";
 
         try {
-            JSONObject object = new JSONObject(str);
-            my_obj = new JSONObject(json_str);
-            assertEquals(100, JsonHelper.getElement(object, "state"));
+            JSONObject my_obj = new JSONObject(str);
+            assertEquals("100", JsonHelper.getElement(my_obj, "alarm.state"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
