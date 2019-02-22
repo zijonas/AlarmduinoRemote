@@ -5,42 +5,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
-    tools:context=".AlarmduinoHome">
-
-    <Button
-        android:id="@+id/buttonTrigger"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="@string/deactivated"
-        android:background="@color/colorPrimary"
-        android:textColor="@color/colorAccent"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    tools:context=".gui.AlarmduinoHome">
 
     <ImageButton
-        android:id="@+id/buttonSettings"
-        android:layout_width="175dp"
-        android:layout_height="150dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/buttonTrigger"
+        android:layout_width="395dp"
+        android:layout_height="188dp"
+        android:layout_margin="8dp"
+        android:layout_marginTop="264dp"
+        android:background="@color/colorPrimary"
+        android:padding="20dp"
+        android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonTrigger"
-        app:layout_constraintVertical_bias="0.478"
-        app:srcCompat="?android:attr/listChoiceIndicatorSingle" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@mipmap/shield_not_active" />
+
+
+    <!--<ImageButton-->
+    <!--android:id="@+id/buttonSettings"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_margin="8dp"-->
+    <!--android:padding="20dp"-->
+    <!--android:scaleType="fitCenter"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toTopOf="parent"-->
+    <!--app:layout_constraintVertical_bias="0.732"-->
+    <!--tools:srcCompat="@mipmap/config" />-->
 
 </android.support.constraint.ConstraintLayout>

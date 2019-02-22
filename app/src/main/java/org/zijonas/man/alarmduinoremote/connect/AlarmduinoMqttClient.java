@@ -14,90 +14,92 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.UnsupportedEncodingException;
 
-public class AlarmduinoMqttClient {
+public class AlarmduinoMqttClient extends MqttAndroidClient{
 
-    MqttAndroidClient client;
 
-    public MqttAndroidClient getClient(Context pContext, final String pServerUrl, final String pClientId) {
+    public AlarmduinoMqttClient(Context pContext, String pServerURI, String pClientId) {
+        super(pContext, pServerURI, pClientId);
 
-        client = new MqttAndroidClient(pContext, pServerUrl, pClientId);
+        initClient(pContext, pServerURI, pClientId);
+    }
+
+    private void initClient(Context pContext, final String pServerUrl, final String pClientId) {
 
         try {
-            IMqttToken token = client.connect(getMqttConnectionOption());
+            IMqttToken token = super.connect(getMqttConnectionOption());
             token.setActionCallback(new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    client.setBufferOpts(getDisconnectedBufferOptions());
-                    Log.d("Client", "Connect Success");
+                    setBufferOpts(getDisconnectedBufferOptions());
+                    Log.d(this.getClass().toString(), "Connect Success");
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    Log.d("Client", "Connect Failed - Verify the config " + pServerUrl + " " + pClientId);
+                    Log.d(this.getClass().toString(), "Connect Failed - Verify the config " + pServerUrl + " " + pClientId);
                     Log.d("Exception:", exception.getMessage());
                     exception.printStackTrace();
                 }
             });
 
         } catch (MqttException ex) {
-            Log.d("Client", "Connect Failed to connect to server");
+            Log.d(this.getClass().toString(), "Connect Failed to connect to server");
         }
-
-        return client;
     }
 
-    public void publishMessage(@NonNull MqttAndroidClient pClient, @NonNull String pMsg, int pQos, @NonNull String pTopic) throws MqttException, UnsupportedEncodingException {
+    public void publishMessage(@NonNull String pMsg, int pQos, @NonNull String pTopic) throws MqttException, UnsupportedEncodingException {
         byte[] encodedPayload;
         encodedPayload = pMsg.getBytes("UTF-8");
         MqttMessage message = new MqttMessage(encodedPayload);
         message.setRetained(true);
         message.setQos(pQos);
-        pClient.publish(pTopic, message);
+        publish(pTopic, message);
     }
 
-    public void subscribe(@NonNull MqttAndroidClient pClient, @NonNull final String pTopic, int pQos) throws MqttException {
-        IMqttToken token = pClient.subscribe(pTopic, pQos);
+    public void subscribeTopic(@NonNull final String pTopic, int pQos) throws MqttException {
+        IMqttToken token = super.subscribe(pTopic, pQos);
         token.setActionCallback(new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken iMqttToken) {
-                Log.d("Client", "Subscribe Successfully " + pTopic);
+                Log.d(this.getClass().toString(), "Subscribe Successfully " + pTopic);
             }
 
             @Override
             public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
-                Log.e("Client", "Subscribe Failed " + pTopic);
+                Log.e(this.getClass().toString(), "Subscribe Failed " + pTopic);
             }
         });
     }
 
-    public void unSubscribe(@NonNull MqttAndroidClient pClient, @NonNull final String pTopic) throws MqttException {
-        IMqttToken token = pClient.unsubscribe(pTopic);
+    public void unsubscribeTopic(@NonNull final String pTopic) throws MqttException {
+        IMqttToken token = super.unsubscribe(pTopic);
         token.setActionCallback(new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken iMqttToken) {
-                Log.d("Client", "UnSubscribe Successfully " + pTopic);
+                Log.d(this.getClass().toString(), "UnSubscribe Successfully " + pTopic);
             }
 
             @Override
             public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
-                Log.e("Client", "UnSubscribe Failed " + pTopic);
+                Log.e(this.getClass().toString(), "UnSubscribe Failed " + pTopic);
             }
         });
     }
 
-    public void disconnect(@NonNull MqttAndroidClient pClient) throws MqttException {
-        IMqttToken mqttToken = pClient.disconnect();
+    public IMqttToken disconnect() throws MqttException {
+        IMqttToken mqttToken = super.disconnect();
         mqttToken.setActionCallback(new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken iMqttToken) {
-                Log.d("Client", "Successfully disconnected");
+                Log.d(this.getClass().toString(), "Successfully disconnected");
             }
 
             @Override
             public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
-                Log.d("Client", "Failed to disconnected " + throwable.toString());
+                Log.d(this.getClass().toString(), "Failed to disconnected " + throwable.toString());
             }
         });
+        return mqttToken;
     }
 
     private DisconnectedBufferOptions getDisconnectedBufferOptions() {
